@@ -1,0 +1,14 @@
+[project]
+name = "quack-query"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.4.3",
+    "nicegui>=3.5.0",
+    "pandas>=2.3.3",
+    "plotly>=6.5.2",
+    "python-multipart>=0.0.21",
+    "sqlglot>=28.6.0",
+]
