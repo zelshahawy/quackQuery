@@ -16,8 +16,8 @@ def _utcnow_iso() -> str:
 def init_meta_db() -> None:
     META_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(META_DB_PATH) as conn:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute(
+        _ = conn.execute("PRAGMA journal_mode=WAL;")
+        _ = conn.execute(
             """
             CREATE TABLE IF NOT EXISTS datasets (
                 id TEXT PRIMARY KEY,
@@ -28,7 +28,7 @@ def init_meta_db() -> None:
             );
             """
         )
-        conn.execute(
+        _ = conn.execute(
             """
             CREATE TABLE IF NOT EXISTS queries (
                 id TEXT PRIMARY KEY,
