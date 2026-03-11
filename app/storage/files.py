@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from pathlib import Path
 import uuid
+from pathlib import Path
 
-
-UPLOAD_DIR = Path("uploads")
+from app.config import settings
 
 
 def save_upload_to_disk(filename: str, content: bytes) -> Path:
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    settings.uploads_dir.mkdir(parents=True, exist_ok=True)
     safe_name = filename.replace("/", "_").replace("\\", "_")
-    out = UPLOAD_DIR / f"{uuid.uuid4().hex}_{safe_name}"
+    out = settings.uploads_dir / f"{uuid.uuid4().hex}_{safe_name}"
     _ = out.write_bytes(content)
     return out

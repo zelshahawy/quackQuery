@@ -3,10 +3,9 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
-META_DB_PATH = Path("data/meta.sqlite3")
+from app.config import settings
 
 
 def _utcnow_iso() -> str:
@@ -14,8 +13,8 @@ def _utcnow_iso() -> str:
 
 
 def init_meta_db() -> None:
-    META_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(META_DB_PATH) as conn:
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(settings.meta_db_path) as conn:
         _ = conn.execute("PRAGMA journal_mode=WAL;")
         _ = conn.execute(
             """
@@ -65,7 +64,7 @@ class QueryLog:
 
 
 def add_dataset(*, dataset_id: str, name: str, table_name: str, file_path: str) -> None:
-    with sqlite3.connect(META_DB_PATH) as conn:
+    with sqlite3.connect(settings.meta_db_path) as conn:
         _ = conn.execute(
             "INSERT INTO datasets (id, name, table_name, file_path, created_at) VALUES (?, ?, ?, ?, ?)",
             (dataset_id, name, table_name, file_path, _utcnow_iso()),
@@ -73,7 +72,7 @@ def add_dataset(*, dataset_id: str, name: str, table_name: str, file_path: str) 
 
 
 def list_datasets() -> list[Dataset]:
-    with sqlite3.connect(META_DB_PATH) as conn:
+    with sqlite3.connect(settings.meta_db_path) as conn:
         rows = conn.execute(
             "SELECT id, name, table_name, file_path, created_at FROM datasets ORDER BY created_at DESC"
         ).fetchall()
@@ -81,7 +80,7 @@ def list_datasets() -> list[Dataset]:
 
 
 def get_dataset(dataset_id: str) -> Dataset | None:
-    with sqlite3.connect(META_DB_PATH) as conn:
+    with sqlite3.connect(settings.meta_db_path) as conn:
         row = conn.execute(
             "SELECT id, name, table_name, file_path, created_at FROM datasets WHERE id = ?",
             (dataset_id,),
@@ -98,7 +97,7 @@ def add_query_log(
     ok: bool,
     error: str | None,
 ) -> None:
-    with sqlite3.connect(META_DB_PATH) as conn:
+    with sqlite3.connect(settings.meta_db_path) as conn:
         conn.execute(
             "INSERT INTO queries (id, dataset_id, question, sql, ok, error, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (query_id, dataset_id, question, sql, 1 if ok else 0, error, _utcnow_iso()),
@@ -106,7 +105,7 @@ def add_query_log(
 
 
 def list_query_logs(limit: int = 50) -> list[QueryLog]:
-    with sqlite3.connect(META_DB_PATH) as conn:
+    with sqlite3.connect(settings.meta_db_path) as conn:
         rows: list[tuple[Any, ...]] = conn.execute(
             """
             SELECT id, dataset_id, question, sql, ok, error, created_at
